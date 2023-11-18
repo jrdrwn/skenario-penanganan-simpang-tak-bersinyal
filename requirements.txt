@@ -1,0 +1,2 @@
+prettytable==3.9.0
+colored==2.2.3
