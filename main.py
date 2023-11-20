@@ -1,5 +1,6 @@
 import json
 import math
+from pprint import pprint
 from colorama import Back, Style
 from prettytable import PrettyTable
 
@@ -184,13 +185,13 @@ class Capacity:
     def tipe_simpang(self):
         return "".join(map(lambda x: str(x), [len(self.data)] + self.jumlah_lajur()))
 
-    def get_kapasitas_dasar(self):
+    def kapasitas_dasar(self):
         return self.KAPASITAS_DASAR[self.tipe_simpang()]
 
-    def get_faktor_penyesuaian_lebar_pendekat(self):
+    def faktor_penyesuaian_lebar_pendekat(self):
         return self.PENYESUAIAN_LEBAR_PENDEKAT[self.tipe_simpang()](self.lebar_rata_rata_pendekat())
 
-    def get_faktor_penyesuaian_median_jalan_utama(self):
+    def faktor_penyesuaian_median_jalan_utama(self):
         def utama_check(x):
             if "utama" in x["tipe"]:
                 if not x["median"]:
@@ -202,10 +203,10 @@ class Capacity:
 
         return list(map(utama_check, self.data))[0]
 
-    def get_faktor_penyesuaian_ukuran_kota(self):
+    def faktor_penyesuaian_ukuran_kota(self):
         return self.FAKTOR_PENYESUAIAN_UKURAN_KOTA["sedang"]
 
-    def get_frsu(self):
+    def frsu(self):
         return self.FRSU
 
     def faktor_penyesuaian_belok(self, Q, QLT, QRT):
@@ -220,13 +221,13 @@ class Capacity:
     def faktor_penyesuaian_rasio_arus_jalan_minor(self, Q, Qmi):
         return self.FAKTOR_PENYESUAIAN_ARUS_JALAN_MINOR[self.tipe_simpang()](Qmi / Q)
 
-    def get_capacity(self, Q, QLT, QRT, Qmi):
+    def capacity(self, Q, QLT, QRT, Qmi):
         C = (
-            self.get_kapasitas_dasar()
-            * self.get_faktor_penyesuaian_lebar_pendekat()
-            * self.get_faktor_penyesuaian_median_jalan_utama()
-            * self.get_faktor_penyesuaian_ukuran_kota()
-            * self.get_frsu()
+            self.kapasitas_dasar()
+            * self.faktor_penyesuaian_lebar_pendekat()
+            * self.faktor_penyesuaian_median_jalan_utama()
+            * self.faktor_penyesuaian_ukuran_kota()
+            * self.frsu()
             * self.faktor_penyesuaian_belok(Q, QLT, QRT)[0]
             * self.faktor_penyesuaian_belok(Q, QLT, QRT)[1]
             * self.faktor_penyesuaian_rasio_arus_jalan_minor(Q, Qmi)
@@ -304,6 +305,21 @@ def create_siklus_waktu(fase, add_row):
     return result
 
 
+def level_of_service(DS):
+    if DS <= 0.02:
+        return "A"
+    elif DS <= 0.44:
+        return "B"
+    elif DS <= 0.74:
+        return "C"
+    elif DS <= 0.84:
+        return "D"
+    elif DS < 1.00:
+        return "E"
+    else:
+        return "F"
+
+
 def main():
     composition = Composition()
     peak_hour = PeakHour(composition.calculate())
@@ -315,7 +331,7 @@ def main():
     rekapitulasi = {}
 
     for v in ["pagi", "siang", "sore"]:
-        C = round(capacity.get_capacity(Q[v], QLT[v], QRT[v], Qmi[v]), 2)
+        C = round(capacity.capacity(Q[v], QLT[v], QRT[v], Qmi[v]), 2)
         DS = round(round(Q_smp[v], 2) / C, 2)
         if DS <= 0.6:
             DT1 = 2 + 8.2078 * DS - (1 - DS) * 2
@@ -342,6 +358,24 @@ def main():
     rekapitulasi.sort(key=lambda x: x[1]["D"], reverse=True)
 
     SELECTED = rekapitulasi[0][0]
+    rekap_ds = PrettyTable()
+    rekap_ds.field_names = ["Jam Sibuk", "Derajat Kejenuhan (DS)", "Level Of Service (LOS)"]
+    for i in rekapitulasi:
+        if i[0] == SELECTED:
+            rekap_ds.add_row([f"{Back.RED}{i[0]}{Style.RESET_ALL}", f"{Back.RED}{i[1]['DS']}{Style.RESET_ALL}", f"{Back.RED}{level_of_service(i[1]['DS'])}{Style.RESET_ALL}"])
+        else:
+            rekap_ds.add_row([i[0], i[1]["DS"], level_of_service(i[1]["DS"])])
+
+    print(rekap_ds)
+
+    high_ds = PrettyTable()
+    high_ds.field_names = ["Deskripsi Level Of Service  (LOS)"]
+    high_ds.align["Deskripsi Level Of Service  (LOS)"] = "l"
+    with open("level_of_service.json", "r") as f:
+        i = json.load(f)
+        for j in i[level_of_service(rekapitulasi[0][1]["DS"])]:
+            high_ds.add_row([j])
+    print(high_ds)
 
     MERGE_SELECTED = []
 
