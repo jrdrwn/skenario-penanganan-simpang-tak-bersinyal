@@ -3,7 +3,6 @@ import math
 from colored import Back, Style
 from prettytable import PrettyTable
 
-
 class Composition:
     WAKTU_SLICE = {"pagi-top": slice(0, 4), "pagi-bottom": slice(4, 8), "siang-top": slice(8, 12), "siang-bottom": slice(12, 16), "sore-top": slice(16, 20), "sore-bottom": slice(20, 24)}
 
@@ -354,6 +353,13 @@ def main():
         }
 
     rekapitulasi = list(rekapitulasi.items())
+
+    rekap_tabel = PrettyTable()
+    rekap_tabel.field_names = ["Jam Sibuk", "Q", "C", "DS", "D"]
+    for i in rekapitulasi:
+        rekap_tabel.add_row([i[0], i[1]["Q"], i[1]["C"], i[1]["DS"], i[1]["D"]])
+    print(rekap_tabel)
+
     rekapitulasi.sort(key=lambda x: x[1]["D"], reverse=True)
 
     SELECTED = rekapitulasi[0][0]
