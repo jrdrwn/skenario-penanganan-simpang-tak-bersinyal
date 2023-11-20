@@ -1,0 +1,32 @@
+{
+  "A": [
+    "Kondisi arus bebas dengan volume lalu lintas rendah dan kecepatan tinggi.",
+    "Kepadatan lalu lintas sangat rendah dengan kecepatan yang dapat dikendalikan oleh pengemudi berdasarkan batasan kecepatan maksimum/minimum dan kondisi fisik jalan.",
+    "Pengemudi dapat mempertahankan kecepatan yang diinginkannya tanpa atau dengan sedikit tundaan."
+  ],
+  "B": [
+    "Arus stabil dengan volume lalu lintas sedang dan kecepatan mulai dibatasi oleh kondisi lalu lintas.",
+    "Kepadatan lalu lintas rendah, hambatan internal lalu lintas belum mempengaruhi kecepatan.",
+    "Pengemudi masih cukup punya kebebasan yang cukup untuk memilih kecepatannya dan lajur jalan yang digunakan."
+  ],
+  "C": [
+    "Arus stabil tetapi kecepatan dan pergerakan kendaraan dikendalikan oleh volume lalu lintas yang lebih tinggi.",
+    "Kepadatan lalu lintas meningkat, dan hambatan internal meningkat.",
+    "Pengemudi memiliki keterbatasan untuk memilih kecepatan, pindah lajur atau mendahului."
+  ],
+  "D": [
+    "Arus mendekati tidak stabil dengan volume lalu lintas tinggi dan kecepatan masih ditolerir namun sangat terpengaruh oleh perubahan kondisi arus.",
+    "Kepadatan lalu lintas sedang, fluktuasi volume lalu lintas dan hambatan temporer dapat menyebabkan penurunan kecepatan yang besar.",
+    "Pengemudi memiliki kebebasan yang sangat terbatas dalam menjalankan kendaraan, kenyamanan rendah, tetapi kondisi ini masih dapat ditolerir untuk waktu yang sangat singkat."
+  ],
+  "E": [
+    "arus lebih rendah daripada tingkat pelayanan D dengan volume lalu lintas mendekati kapasitas jalan dan kecepatan sangat rendah, 19",
+    "kepadatan lalu lintas tinggi karena hambatan internal lalu lintas tinggi.",
+    "pengemudi mulai merasakan kemacetan-kemacetan durasi pendek."
+  ],
+  "F": [
+    "Arus tertahan dan terjadi antrian kendaraan yang panjang.",
+    "Kepadatan lalu lintas sangat tinggi dan volume rendah serta terjadi kemacetan untuk durasi yang cukup lama.",
+    "Dalam keadaan antrian, kecepatan maupun volume turun sampai 0."
+  ]
+}
