@@ -361,7 +361,7 @@ def main():
     rekap_ds.field_names = ["Jam Sibuk", "Derajat Kejenuhan (DS)", "Level Of Service (LOS)"]
     for i in rekapitulasi:
         if i[0] == SELECTED:
-            rekap_ds.add_row([f"{Back.RED}{i[0]}{Style.RESET_ALL}", f"{Back.RED}{i[1]['DS']}{Style.RESET_ALL}", f"{Back.RED}{level_of_service(i[1]['DS'])}{Style.RESET_ALL}"])
+            rekap_ds.add_row([f"{Back.RED}{i[0]}{Style.reset}", f"{Back.RED}{i[1]['DS']}{Style.reset}", f"{Back.RED}{level_of_service(i[1]['DS'])}{Style.reset}"])
         else:
             rekap_ds.add_row([i[0], i[1]["DS"], level_of_service(i[1]["DS"])])
 
