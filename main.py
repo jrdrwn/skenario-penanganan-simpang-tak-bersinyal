@@ -1,7 +1,6 @@
 import json
 import math
-from pprint import pprint
-from colorama import Back, Style
+from colored import Back, Style
 from prettytable import PrettyTable
 
 
@@ -298,7 +297,7 @@ def create_siklus_waktu(fase, add_row):
                 round(C2, 2),
                 round(DS, 2),
                 printRoman(idx + 1),
-                f"{Back.RED}{f'{tmerah_prevv2}'.center(merah_prevv2)}{Back.GREEN}{f'{hijau}'.center(hijau)}{Back.YELLOW}{f'{kuning}'.center(kuning)}{Back.RED}{f'{all_red}'.center(all_red)}{f'{tmerah_next}'.center(merah_next) }{Style.RESET_ALL}",
+                f"{Back.RED}{f'{tmerah_prevv2}'.center(merah_prevv2)}{Back.GREEN}{f'{hijau}'.center(hijau)}{Back.YELLOW}{f'{kuning}'.center(kuning)}{Back.RED}{f'{all_red}'.center(all_red)}{f'{tmerah_next}'.center(merah_next) }{Style.reset}",
             ],
             divider=True if idx == len(fase) - 1 else False,
         )
