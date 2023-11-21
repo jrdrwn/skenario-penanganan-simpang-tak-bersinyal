@@ -130,6 +130,11 @@ class Capacity:
     FRSU = 0.88
     FAKTOR_PENYESUAIAN_ARUS_JALAN_MINOR = {
         "422": lambda x: 1.19 * x**2 - 1.19 * x + 1.19,
+        '322': lambda x: (-0.595*x**2 + 0.595*x**3 + 0.74 if x >= 0.5 else 1.19*x**2 - 1.19*x + 1.19),
+        '424': lambda x: (16.6 * x**4 - 33.5 * x**3 + 25.3*x**2 - 8.6*x + 1.95 if x < 0.3 else 1.11 * x**2 - 1.11*x + 1.11),
+        '444': lambda x: (16.6 * x**4 - 33.5 * x**3 + 25.3*x**2 - 8.6*x + 1.95 if x < 0.3 else 1.11 * x**2 - 1.11*x + 1.11),
+        '342': lambda x: ( 1.19 * x**2 - 1.19 * x + 1.19 if x < 0.5 else 2.38 * x**2 - 2.38*x + 1.49),
+        '324': lambda x: (16.6 * x ** 4 - 33.3 * x ** 3 + 25.3 * x ** 2 - 8.6 * x + 1.95 if x < 0.3 else 1.11 * x ** 2 - 1.11 * x + 1.11 if x < 0.5 else -0.555  * x ** 2 - 0.555 * x + 0.69), 
     }
 
     def __init__(self, data) -> None:
@@ -280,7 +285,10 @@ def create_siklus_waktu(fase, add_row):
         merah_next = c - gi - AMBER - merah_prev - (1 if idx == 0 else 0)
 
         tmerah_prevv2 = merah_prevv2 if merah_prevv2 else ""
-        tmerah_next = merah_next if merah_next else ""
+        tmerah_next = merah_next if merah_next > 0 else ""
+        if merah_next < 0:
+            tmerah_prevv2 -= 1
+            merah_prevv2 -= 1
         add_row(
             [
                 str(len(fase)) + " Fase",
@@ -317,9 +325,67 @@ def level_of_service(DS):
     else:
         return "F"
 
+def display_fase_lalu_lintas_simpang_3(merge_selected):
+    result = PrettyTable()
+
+    result.field_names = ["Recom Fase", "Siklus", "IG", "F", "Amber", "AR", "LTI", "Pendekat", "Hijau", "Merah", "Kapasitas", "DS", "Fase", "Siklus Waktu"]
+
+    fase = []
+    for i in merge_selected:
+        fase.append(i | {"fr": round(i["Q"] / i["S"], 3)})
+
+    create_siklus_waktu(fase, result.add_row)
+
+    fase3 = []
+    max_minor = max(list(filter(lambda x: "utama" in x["tipe"], fase)), key=lambda x: x["fr"]).copy()
+    max_minor["pendekat"] = "BT"
+    fase3 += list(filter(lambda x: "minor" in x["tipe"], fase))
+    fase3.insert(1, max_minor)
+
+    create_siklus_waktu(fase3, result.add_row)
+
+    print(result)
+
+def display_fase_lalu_lintas_simpang_4(merge_selected):
+    result = PrettyTable()
+
+    result.field_names = ["Recom Fase", "Siklus", "IG", "F", "Amber", "AR", "LTI", "Pendekat", "Hijau", "Merah", "Kapasitas", "DS", "Fase", "Siklus Waktu"]
+
+    fase = []
+    for i in merge_selected:
+        fase.append(i | {"fr": round(i["Q"] / i["S"], 3)})
+
+    create_siklus_waktu(fase, result.add_row)
+
+    fase2 = []
+    max_utama = max(list(filter(lambda x: "utama" in x["tipe"], fase)), key=lambda x: x["fr"]).copy()
+    max_utama["pendekat"] = "US"
+    fase2.append(max_utama)
+    fase2 += list(filter(lambda x: "minor" in x["tipe"], fase))
+
+    create_siklus_waktu(fase2, result.add_row)
+
+    fase3 = []
+    max_minor = max(list(filter(lambda x: "minor" in x["tipe"], fase)), key=lambda x: x["fr"]).copy()
+    max_minor["pendekat"] = "BT"
+    fase3 += list(filter(lambda x: "utama" in x["tipe"], fase))
+    fase3.insert(1, max_minor)
+
+    create_siklus_waktu(fase3, result.add_row)
+
+    fase4 = []
+    max_utama = max(list(filter(lambda x: "utama" in x["tipe"], fase)), key=lambda x: x["fr"]).copy()
+    max_utama["pendekat"] = "US"
+    max_minor = max(list(filter(lambda x: "minor" in x["tipe"], fase)), key=lambda x: x["fr"]).copy()
+    max_minor["pendekat"] = "BT"
+    fase4 += [max_utama, max_minor]
+
+    create_siklus_waktu(fase4, result.add_row)
+    print(result)
 
 def main():
     composition = Composition()
+    from pprint import pprint
     peak_hour = PeakHour(composition.calculate())
     peak_hour.create_smp()
 
@@ -327,6 +393,7 @@ def main():
 
     Q, QLT, QRT, Qmi, Qma, Q_smp = peak_hour.create_Q()
     rekapitulasi = {}
+
 
     for v in ["pagi", "siang", "sore"]:
         C = round(capacity.capacity(Q[v], QLT[v], QRT[v], Qmi[v]), 2)
@@ -351,7 +418,6 @@ def main():
             "DS": DS,
             "D": D,
         }
-
     rekapitulasi = list(rekapitulasi.items())
 
     rekap_tabel = PrettyTable()
@@ -402,42 +468,11 @@ def main():
         }
 
         MERGE_SELECTED.append(data)
-
-    result = PrettyTable()
-
-    result.field_names = ["Recom Fase", "Siklus", "IG", "F", "Amber", "AR", "LTI", "Pendekat", "Hijau", "Merah", "Kapasitas", "DS", "Fase", "Siklus Waktu"]
-
-    fase = []
-    for i in MERGE_SELECTED:
-        fase.append(i | {"fr": round(i["Q"] / i["S"], 3)})
-
-    create_siklus_waktu(fase, result.add_row)
-
-    fase2 = []
-    max_utama = max(list(filter(lambda x: "utama" in x["tipe"], fase)), key=lambda x: x["fr"]).copy()
-    max_utama["pendekat"] = "US"
-    fase2.append(max_utama)
-    fase2 += list(filter(lambda x: "minor" in x["tipe"], fase))
-
-    create_siklus_waktu(fase2, result.add_row)
-
-    fase3 = []
-    max_minor = max(list(filter(lambda x: "minor" in x["tipe"], fase)), key=lambda x: x["fr"]).copy()
-    max_minor["pendekat"] = "BT"
-    fase3 += list(filter(lambda x: "utama" in x["tipe"], fase))
-    fase3.insert(1, max_minor)
-
-    create_siklus_waktu(fase3, result.add_row)
-
-    fase4 = []
-    max_utama = max(list(filter(lambda x: "utama" in x["tipe"], fase)), key=lambda x: x["fr"]).copy()
-    max_utama["pendekat"] = "US"
-    max_minor = max(list(filter(lambda x: "minor" in x["tipe"], fase)), key=lambda x: x["fr"]).copy()
-    max_minor["pendekat"] = "BT"
-    fase4 += [max_utama, max_minor]
-
-    create_siklus_waktu(fase4, result.add_row)
-    print(result)
+    
+    if len(MERGE_SELECTED) == 3:
+        display_fase_lalu_lintas_simpang_3(MERGE_SELECTED)
+    else:
+        display_fase_lalu_lintas_simpang_4(MERGE_SELECTED)
 
 
 if __name__ == "__main__":
