@@ -38,9 +38,9 @@ kemudian extract dan buka direktori project
 Jalankan perintah ini di terminal untuk menginstall library yang dibutuhkan
 
 ```bash
-pip3 install -r requirement.txt
+pip3 install -r requirements.txt
 # atau jika error
-pip install -r requirement.txt
+pip install -r requirements.txt
 ```
 
 # Traffic Light Data Setup
